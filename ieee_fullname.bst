@@ -1078,7 +1078,8 @@ FUNCTION {presort}
 
 ITERATE {presort}
 
-SORT
+% Keep references in citation order rather than sorting by author/title/year.
+% SORT
 
 STRINGS { longest.label }
 
@@ -1130,6 +1131,5 @@ EXECUTE {end.bib}
 
 % end of file ieee.bst
 % ---------------------------------------------------------------
-
 
 

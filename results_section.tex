@@ -1,0 +1,155 @@
+% ============================================================================
+%  Experimental Results + Discussion (DROP-IN REPLACEMENT)
+%
+%  HOW TO USE
+%  ----------
+%  In main.tex, DELETE the current Section "Experimental Results"
+%  (the block from "\section{Experimental Results}" down to just before
+%  "\section{Conclusion}") and replace it with one line:
+%
+%      \input{results_section}
+%
+%  Requires (already in main.tex preamble): booktabs, amssymb,
+%  \xhdr command, cleveref. Uses table* (full page width) for the wide
+%  statistics table, so it must be in a twocolumn document (it is).
+%
+%  All numbers below are produced by:
+%      python eval/statistical_tests.py   -> eval/statistical_tests.json
+%      python eval/failure_analysis.py    -> eval/failure_analysis.json
+%      python eval/compare_scores.py      -> eval/comparison_summary.json
+%  in the ai-interview-coach repository. Regenerate those if data changes.
+% ============================================================================
+
+\section{Experimental Results}
+\label{sec:results}
+
+\xhdr{Evaluation protocol.} We evaluate both models on a fixed held-out test
+set of 200 examples. The test questions and the simulated student answers are
+identical for the baseline and the trained model, so any score difference is
+attributable only to the coaching model. For each example, the judge model
+(Qwen3.5-9B) scores the feedback on five dimensions (Technical Correctness,
+Specificity, Helpfulness, Actionability, Interview Coaching Quality), each on a
+1--20 scale; the overall score is their mean. We report per-dimension means and,
+because the same 200 items are scored by both models, we treat the two score
+vectors as \emph{paired} samples and test the difference with a paired
+$t$-test, the Wilcoxon signed-rank test (robust to the non-normal,
+ceiling-bound score distribution), and an exact binomial sign test on the
+non-tie items. We also report Cohen's $d$ for paired samples as an effect size.
+
+\xhdr{Aggregate results.} As shown in \cref{tab:results}, the SFT+DPO model
+attains a marginally higher mean overall score than the baseline
+($17.03$ vs.\ $16.86$, $\Delta=+0.17$ on the 1--20 scale). The improvement is
+consistent in direction across all five dimensions, but small in magnitude
+(per-dimension $\Delta$ between $+0.14$ and $+0.19$).
+
+\xhdr{Statistical significance.} The improvement is \emph{not} statistically
+significant. For the overall score, the paired $t$-test gives $t=0.81$,
+$p=0.42$, and the Wilcoxon signed-rank test gives $p=0.70$; the effect size is
+negligible (Cohen's $d=0.057$). No individual dimension reaches significance
+(all $p>0.38$; see \cref{tab:stats}). On an item-by-item basis the trained
+model wins on 48 examples, loses on 40, and ties on 112; the sign test over the
+88 non-tie items is also non-significant ($p=0.46$). We therefore cannot reject
+the null hypothesis that SFT+DPO leaves feedback quality unchanged under this
+judge and rubric.
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    Dimension & Baseline & SFT+DPO & $\Delta$ \\
+    \midrule
+    Technical Correctness        & 16.79 & 16.92 & $+0.14$ \\
+    Specificity                  & 16.88 & 17.06 & $+0.19$ \\
+    Helpfulness                  & 16.88 & 17.05 & $+0.18$ \\
+    Actionability                & 16.89 & 17.05 & $+0.17$ \\
+    Interview Coaching Quality   & 16.88 & 17.06 & $+0.19$ \\
+    \midrule
+    \textbf{Overall Score}       & \textbf{16.86} & \textbf{17.03} & $\mathbf{+0.17}$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Mean judge scores (1--20) on the 200-example test set. The trained
+  model is consistently but marginally higher across all dimensions.}
+  \label{tab:results}
+\end{table}
+
+\begin{table*}[t]
+  \centering
+  \small
+  \begin{tabular}{@{}lcccccc@{}}
+    \toprule
+    Dimension & Baseline (SD) & SFT+DPO (SD) & $\Delta$ & Paired $t$ ($p$) & Wilcoxon $p$ & Cohen's $d$ \\
+    \midrule
+    Technical Correctness        & 16.79 (2.40) & 16.92 (1.92) & $+0.14$ & $0.63\ (0.53)$ & $0.73$ & $0.044$ \\
+    Specificity                  & 16.88 (2.37) & 17.06 (1.82) & $+0.19$ & $0.88\ (0.38)$ & $0.65$ & $0.062$ \\
+    Helpfulness                  & 16.88 (2.37) & 17.05 (1.85) & $+0.18$ & $0.83\ (0.41)$ & $0.69$ & $0.058$ \\
+    Actionability                & 16.89 (2.38) & 17.05 (1.84) & $+0.17$ & $0.78\ (0.44)$ & $0.81$ & $0.055$ \\
+    Interview Coaching Quality   & 16.88 (2.37) & 17.06 (1.82) & $+0.19$ & $0.88\ (0.38)$ & $0.69$ & $0.062$ \\
+    \midrule
+    \textbf{Overall Score}       & \textbf{16.86 (2.37)} & \textbf{17.03 (1.85)} & $\mathbf{+0.17}$ & $\mathbf{0.81\ (0.42)}$ & $\mathbf{0.70}$ & $\mathbf{0.057}$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Paired statistical comparison of baseline vs.\ SFT+DPO over the 200
+  test examples. No dimension reaches significance at $\alpha=0.05$, and all
+  effect sizes are negligible ($d<0.07$). Win/loss/tie on the overall score is
+  48/40/112; the sign test over non-tie items gives $p=0.46$.}
+  \label{tab:stats}
+\end{table*}
+
+\section{Discussion}
+\label{sec:discussion}
+
+The absence of a significant difference is itself an informative result. We
+identify three contributing factors and support them with a per-item failure
+analysis.
+
+\xhdr{Ceiling effect.} The judge already rates the baseline very highly,
+leaving little headroom for improvement. 65\% of baseline outputs score
+$\geq 18/20$, and on 191 of 200 items \emph{both} models score $\geq 15$. When
+the starting point is already near the top of the scale, even a genuinely
+better model cannot move the mean by much.
+
+\xhdr{Coarse judge resolution.} The judge's scores are effectively discrete,
+clustering on a handful of values (predominantly 15 and 18), and the five
+rubric dimensions almost always move together (their per-item scores are nearly
+identical). This low resolution injects noise and masks the fine-grained
+differences that distinguish good coaching feedback from excellent coaching
+feedback.
+
+\xhdr{Offsetting gains and regressions.} The flat average hides real movement
+in both directions: 48 items improve, 40 regress, and these roughly cancel. The
+trained model's largest wins are recoveries of \emph{catastrophic} baseline
+failures---three items jump from 1 to 18 (\texttt{test\_0001},
+\texttt{test\_0073}, \texttt{test\_0119}) by removing a baseline hallucination
+that claimed the student had missed a concept actually present in the answer.
+However, the trained model also introduces \emph{new} technical errors that the
+baseline did not make: in the most severe regression, \texttt{test\_0194} drops
+from 18 to 1 because the feedback falsely asserts that Java's
+\texttt{@Override} annotation throws a runtime \texttt{java.lang.Error}.
+Categorizing the judge's stated reason on the 40 regressions, 4 are clear
+technical inaccuracies and the remainder are smaller, mostly within the judge's
+own scoring noise (e.g.\ slightly less complete or less specific feedback).
+
+\xhdr{Test-set diversity limitation.} A confound limits what this experiment can
+demonstrate. Although our methodology defines five student-answer types
+(correct-but-incomplete, partially correct, incorrect, too vague, verbose but
+unfocused), in the released data all 200 test items (and all training items)
+carry the label \texttt{partially\_correct}, and the question
+category/difficulty metadata is missing (\texttt{Unknown}) for 189 of the 200
+items. The evaluation therefore probes only a single, narrow slice of the
+intended input distribution. A homogeneous test set both reduces the variety of
+coaching behaviors exercised and likely contributes to the ceiling effect, since
+``partially correct'' answers tend to elicit similarly-structured feedback that
+the judge scores uniformly. Rebuilding the test set to span the full range of
+answer types and difficulties is the most important step toward a fairer and
+more sensitive comparison.
+
+\xhdr{Implications.} Two methodological lessons follow. First, an LLM judge that
+saturates near the top of its scale is a poor instrument for measuring
+incremental alignment gains; a more discriminative protocol---a finer or
+forced-spread rubric, or direct pairwise preference (win rate) judging rather
+than absolute scoring---would have more statistical power. Second, preference
+optimization that is not explicitly grounded against a reference answer can
+introduce fluent but false technical claims; pairing DPO with a
+factuality-checking signal is a promising direction. We discuss a small-scale
+human evaluation to validate the judge in future work.
