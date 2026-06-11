@@ -43,7 +43,7 @@ Oregon State University\\
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
-   Preparing for software engineering interviews is a critical but resource-intensive process for computer science students. While large language models (LLMs) offer a scalable solution for automated coaching, their feedback often lacks the specificity and actionability required for high-stakes technical interviews. In this project, we present an AI Interview Coach based on the Qwen2.5-3B-Instruct model, optimized through Reinforcement Learning from AI Feedback (RLAIF) and Direct Preference Optimization (DPO). We simulate a diverse range of student answers---from partially correct to verbose but unfocused---and use a stronger judge model (Qwen3.5-9B) to generate high-quality preference data based on a multi-dimensional coaching rubric. Our results demonstrate that DPO-based fine-tuning significantly improves the technical correctness, specificity, and actionability of the coach's feedback compared to the baseline model.
+   Preparing for software engineering interviews is a critical but resource-intensive process for computer science students. While large language models (LLMs) offer a scalable solution for automated coaching, their feedback often lacks the specificity and actionability required for high-stakes technical interviews. In this project, we build an AI Interview Coach based on Qwen2.5-3B-Instruct and attempt to improve it through Reinforcement Learning from AI Feedback (RLAIF) and Direct Preference Optimization (DPO), using a stronger judge model (Qwen3.5-9B) to generate preference data over a five-dimension coaching rubric. On a fixed 200-example test set, the SFT+DPO model attains a marginally higher mean judge score than the baseline (17.03 vs.\ 16.86 on a 1--20 scale), but the difference is not statistically significant (paired $t$-test $p=0.42$; Wilcoxon $p=0.70$; Cohen's $d=0.057$). A per-item failure analysis shows that genuine gains---notably the removal of baseline hallucinations---are offset by newly introduced technical errors, and that a strong ceiling effect (65\% of baseline outputs already score $\geq 18/20$) together with a coarse, homogeneous evaluation set limits the measurable benefit. We discuss the methodological implications for evaluating preference optimization with LLM judges.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
@@ -63,63 +63,45 @@ This work aims to bridge this gap by fine-tuning a lightweight, efficient LLM (Q
 
 \xhdr{Direct Preference Optimization.} DPO simplifies the RLHF pipeline by optimizing the policy model directly from preference pairs without the need for a separate reward model \cite{rafailov2023dpo}. This makes it particularly suitable for constrained compute environments where training a complex reward model is impractical.
 
-\xhdr{AI in Education.} Recent work has explored LLMs for automated grading and feedback in programming and STEM education. However, most existing tools focus on code correctness rather than the conversational and descriptive technical communication required in interviews.
+\xhdr{AI in Education.} Recent work has explored LLMs for automated grading and feedback in programming and STEM education. LLM-based feedback can draw on intelligent tutoring systems and learning sciences to improve pedagogical quality \cite{stamper2024enhancing}. Since our pipeline relies on an LLM judge, we also consider recent findings on aligning LLM-assisted evaluation with human preferences \cite{shankar2024validators}. However, most existing tools focus on code correctness rather than the conversational and descriptive technical communication required in interviews.
 
 \section{Methodology}
 \label{sec:method}
 
-Our methodology consists of four main phases: dataset construction, student answer simulation, preference labeling (RLAIF), and model optimization.
+Our pipeline consists of four phases: (i) dataset construction and student-answer simulation, (ii) preference-candidate generation with bias control, (iii) preference labeling via an LLM judge (RLAIF), and (iv) model optimization with SFT and DPO. Throughout, the policy model that is fine-tuned is Qwen2.5-3B-Instruct, and a stronger Qwen3.5-9B model serves as the judge.
 
 \subsection{Dataset and Student Simulation}
-We constructed a dataset of 4,853 software engineering interview questions sourced from diverse technical repositories. To evaluate the coach's effectiveness, we simulated student answers using a specific persona of a first-year CS Master's student. We prompted the base Qwen2.5-3B model to generate answers representing various failure modes, including:
+We build the dataset from two software engineering interview question sources (an internal \emph{Software Questions} set and a public \emph{ai\_interview\_questions} set). After preprocessing we obtain 4,653 training examples and a held-out test set of 200 examples. Each example pairs an interview question with a reference answer, category and difficulty metadata, and a simulated student answer.
+
+To probe the coach under realistic conditions, we simulate answers from a fixed persona---a first-year CS Master's student with strong fundamentals but limited industry experience, prone to omitting edge cases and using imprecise terminology. Using this persona, we prompt the base model to produce five student-answer types spanning the common failure modes:
 \begin{itemize}
-    \item \textbf{Correct but incomplete:} Missing edge cases or optimizations.
-    \item \textbf{Too vague:} Lacking technical depth or specific terminology.
-    \item \textbf{Verbose but unfocused:} Including irrelevant details.
+    \item \textbf{Correct but incomplete:} missing edge cases or optimizations.
+    \item \textbf{Partially correct:} a sound core with notable gaps or errors.
+    \item \textbf{Incorrect:} a fundamentally wrong approach.
+    \item \textbf{Too vague:} lacking technical depth or specific terminology.
+    \item \textbf{Verbose but unfocused:} burying the answer in irrelevant detail.
 \end{itemize}
-This variety ensures the coach learns to handle a wide range of real-world student responses.
+Crucially, the simulated student answers and the test questions are generated \emph{once} and then frozen: the identical inputs are reused for baseline evaluation, preference generation, and final evaluation. This design isolates the coaching model as the only variable, so any score difference is attributable to fine-tuning rather than to changes in the inputs. We note, however, that in the released data used for the experiments in this paper every train and test item carries the single label \texttt{partially\_correct}, and category/difficulty metadata is \texttt{Unknown} for most items; the evaluation therefore exercises only this subset of the intended answer types (see \cref{sec:discussion}).
+
+\subsection{Preference Candidate Generation}
+For each training example, the base model generates two coaching feedback candidates (\texttt{feedback\_a}, \texttt{feedback\_b}) for the same fixed student answer. To prevent the preference data from encoding superficial cues, we draw each candidate from a randomized but reproducible feedback style, sampled from a pool of distinct coaching styles---\emph{technical precision focus}, \emph{interview communication focus}, \emph{balanced coaching} (strengths/weaknesses/advice), and \emph{supportive yet strict}---generated at varied temperatures. The A/B slot is not tied to a fixed quality level, and we log the style, temperature, and candidate model for each side. This reduces the risk that the downstream model learns spurious patterns such as preferring the second candidate, longer responses, or a particular style.
 
 \subsection{Preference Labeling via RLAIF}
-For each student answer in the training set, we generated two candidate feedback responses from the base model using different style prompts (e.g., "Technical precision focus" vs. "Interview communication focus"). 
-
-We then employed Qwen3.5-9B as a judge to evaluate these candidates based on five dimensions: Technical Correctness, Specificity, Helpfulness, Actionability, and Interview Coaching Quality. The judge model selected the better candidate, creating the \textit{chosen} and \textit{rejected} pairs necessary for DPO.
+We employ Qwen3.5-9B as the judge. It scores feedback on five dimensions---Technical Correctness, Specificity, Helpfulness, Actionability, and Interview Coaching Quality---each on a 1--20 scale, with the top band (18--20) reserved for ``exceptional'' feedback containing concrete code or master-class guidance. For preference selection the judge compares the two candidates and is explicitly instructed to ignore A/B position, length, formatting, tone alone, and style label, basing its choice only on coaching quality. The selected candidate becomes the \textit{chosen} response and the other the \textit{rejected} response, yielding the preference pairs used for DPO.
 
 \subsection{Model Optimization}
-We utilize QLoRA (Quantized Low-Rank Adaptation) for efficient fine-tuning. The process involves:
+We fine-tune with QLoRA (Quantized Low-Rank Adaptation), training lightweight adapter weights rather than the full model to fit our compute budget. Optimization proceeds in two stages:
 \begin{compactenum}
-    \item \textbf{SFT (Supervised Fine-Tuning):} Initial training on high-quality feedback to establish the base coaching persona.
-    \item \textbf{DPO (Direct Preference Optimization):} Training on the RLAIF-labeled preference pairs to optimize for the specific coaching rubric.
+    \item \textbf{SFT (Supervised Fine-Tuning):} we first build a supervised dataset that maps the (question, reference answer, student answer) input to the judge-preferred \textit{chosen} feedback, and train on it to establish the general coaching format and persona.
+    \item \textbf{DPO (Direct Preference Optimization):} starting from the SFT model, we train on the RLAIF-labeled \textit{chosen}/\textit{rejected} pairs to directly optimize for the coaching rubric without a separate reward model.
 \end{compactenum}
 
-\section{Experimental Results}
-\label{sec:results}
-
-\xhdr{Evaluation Metric.} We evaluate the models on a fixed test set of 200 examples. Performance is measured using the 1-20 rubric scored by the judge model.
-
-\xhdr{Baseline Performance.} The baseline Qwen2.5-3B-Instruct model provides a starting point for evaluation. Initial results (Table \ref{tab:results}) show that while the baseline is technically competent, it often lacks the specificity required for "Exceptional" feedback.
-
-\begin{table}[t]
-  \centering
-  \begin{tabular}{@{}lc@{}}
-    \toprule
-    Metric & Baseline Score (Avg) \\
-    \midrule
-    Technical Correctness & 15.2 \\
-    Specificity & 14.1 \\
-    Actionability & 14.8 \\
-    \textbf{Overall Score} & \textbf{14.7} \\
-    \bottomrule
-  \end{tabular}
-  \caption{Baseline performance of Qwen2.5-3B-Instruct.}
-  \label{tab:results}
-\end{table}
-
-\xhdr{DPO Improvement.} [Placeholder for DPO results]. We expect the DPO-trained model to show significant gains in Specificity and Actionability.
+\input{results_section}
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-In this project, we developed an AI Interview Coach that leverages RLAIF and DPO to provide high-quality, actionable feedback for software engineering candidates. By simulating realistic student personas and optimizing for technical precision, our model demonstrates that even smaller language models can be highly effective specialized coaches when properly aligned. Future work could include multi-modal feedback (e.g., analyzing whiteboarding sessions) and integration into a live interview platform.
+We built an AI Interview Coach by fine-tuning Qwen2.5-3B with SFT and DPO on RLAIF-labeled preference data, and evaluated it against the baseline with an LLM judge on a fixed 200-example test set. The trained model scored marginally higher on every rubric dimension, but no difference was statistically significant, and the effect size was negligible. Our failure analysis explains why: the judge saturates near the top of its scale (a ceiling effect), its scores are low-resolution, the evaluation set is homogeneous (all test answers share a single answer-type label), and real improvements are cancelled by occasional new technical errors introduced during preference optimization. Rather than a clear win, our main contributions are negative but instructive: (i) LLM judges that saturate are weak instruments for detecting incremental alignment gains, motivating pairwise/win-rate evaluation and finer rubrics; (ii) reference-free DPO can introduce fluent but false technical claims, motivating a factuality-grounded preference signal. Future work includes rebuilding a diverse test set across all student-answer types and difficulties, a small-scale human evaluation to validate the judge, and grounding the coach against reference answers.
 
 %%%%%%%%% REFERENCES
 {\small

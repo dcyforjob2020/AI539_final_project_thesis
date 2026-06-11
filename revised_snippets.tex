@@ -1,0 +1,72 @@
+% ============================================================================
+%  REVISED TEXT SNIPPETS  (copy-paste, not \input)
+%
+%  The current main.tex Abstract and Conclusion claim the method
+%  "significantly improves" feedback. The data does NOT support that
+%  (paired t-test p=0.42, Wilcoxon p=0.70, Cohen's d=0.057). Below are
+%  honest replacements. Copy the body of each into the matching block of
+%  main.tex. These are plain text snippets, not meant to be \input.
+% ============================================================================
+
+
+% ---------------------------------------------------------------------------
+% (1) REPLACEMENT ABSTRACT  -- replace the text inside \begin{abstract}...\end{abstract}
+% ---------------------------------------------------------------------------
+%
+% Preparing for software engineering interviews is a critical but
+% resource-intensive process for computer science students. While large
+% language models (LLMs) offer a scalable solution for automated coaching,
+% their feedback often lacks the specificity and actionability required for
+% high-stakes technical interviews. In this project, we build an AI Interview
+% Coach based on Qwen2.5-3B-Instruct and attempt to improve it through
+% Reinforcement Learning from AI Feedback (RLAIF) and Direct Preference
+% Optimization (DPO), using a stronger judge model (Qwen3.5-9B) to generate
+% preference data over a five-dimension coaching rubric. On a fixed 200-example
+% test set, the SFT+DPO model attains a marginally higher mean judge score than
+% the baseline (17.03 vs. 16.86 on a 1--20 scale), but the difference is not
+% statistically significant (paired $t$-test $p=0.42$; Wilcoxon $p=0.70$;
+% Cohen's $d=0.057$). A per-item failure analysis shows that genuine gains---
+% notably the removal of baseline hallucinations---are offset by newly
+% introduced technical errors, and that a strong ceiling effect (65\% of
+% baseline outputs already score $\geq 18/20$) together with a coarse,
+% homogeneous evaluation set limits the measurable benefit. We discuss the
+% methodological implications for evaluating preference optimization with LLM
+% judges.
+
+
+% ---------------------------------------------------------------------------
+% (2) REPLACEMENT CONCLUSION  -- replace the body of \section{Conclusion}
+% ---------------------------------------------------------------------------
+%
+% We built an AI Interview Coach by fine-tuning Qwen2.5-3B with SFT and DPO on
+% RLAIF-labeled preference data, and evaluated it against the baseline with an
+% LLM judge on a fixed 200-example test set. The trained model scored
+% marginally higher on every rubric dimension, but no difference was
+% statistically significant, and the effect size was negligible. Our failure
+% analysis explains why: the judge saturates near the top of its scale (a
+% ceiling effect), its scores are low-resolution, the evaluation set is
+% homogeneous (all test answers share a single answer-type label), and real
+% improvements are cancelled by occasional new technical errors introduced
+% during preference optimization. Rather than a clear win, our main
+% contributions are negative but instructive: (i) LLM judges that saturate are
+% weak instruments for detecting incremental alignment gains, motivating
+% pairwise/win-rate evaluation and finer rubrics; (ii) reference-free DPO can
+% introduce fluent but false technical claims, motivating a factuality-grounded
+% preference signal. Future work includes rebuilding a diverse test set across
+% all student-answer types and difficulties, a small-scale human evaluation to
+% validate the judge, and grounding the coach against reference answers.
+
+
+% ---------------------------------------------------------------------------
+% (3) METHODOLOGY FIX  -- factual corrections to \section{Methodology}
+% ---------------------------------------------------------------------------
+%  - The dataset size in the text says "4,853" in the abstract/intro and the
+%    methodology says "4,853"; the released split is ~4,653 train + 200 test.
+%    Use the number that matches your final data (the repo README states 4,653
+%    train / 200 test).
+%  - The methodology lists three student-answer types as if all are present in
+%    the data. In the released test/train files every item is labeled
+%    "partially_correct". Either regenerate the data with the full set of types
+%    or soften the claim to: "We designed prompts for five answer types; the
+%    evaluation in this paper uses the partially-correct subset (see
+%    Limitations)."
