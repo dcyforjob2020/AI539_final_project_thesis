@@ -3,8 +3,7 @@
 \bibitem{ouyang2022instructgpt}
 Long Ouyang et~al.
 \newblock Training language models to follow instructions with human feedback.
-\newblock {\em Advances in Neural Information Processing Systems},
-  35:27730--27744, 2022.
+\newblock {\em Advances in Neural Information Processing Systems}, 35:27730--27744, 2022.
 
 \bibitem{bai2022constitutional}
 Yuntao Bai et~al.
@@ -12,33 +11,24 @@ Yuntao Bai et~al.
 \newblock {\em arXiv preprint arXiv:2212.08073}, 2022.
 
 \bibitem{rafailov2023dpo}
-Rafael Rafailov, Archit Sharma, Eric Mitchell, Stefano Ermon, Christopher~D
-  Manning, and Chelsea Finn.
-\newblock Direct preference optimization: Your language model is secretly a
-  reward model.
+Rafael Rafailov, Archit Sharma, Eric Mitchell, Stefano Ermon, Christopher~D Manning, and Chelsea Finn.
+\newblock Direct preference optimization: Your language model is secretly a reward model.
 \newblock {\em Advances in Neural Information Processing Systems}, 36, 2023.
 
 \bibitem{stamper2024enhancing}
 John Stamper, Ruiwei Xiao, and Xinying Hou.
-\newblock Enhancing {LLM}-based feedback: Insights from intelligent tutoring
-  systems and the learning sciences.
-\newblock In {\em International Conference on Artificial Intelligence in
-  Education}. Springer, 2024.
+\newblock Enhancing {LLM}-based feedback: Insights from intelligent tutoring systems and the learning sciences.
+\newblock In {\em International Conference on Artificial Intelligence in Education}. Springer, 2024.
 
 \bibitem{shankar2024validators}
-Shreya Shankar, J.D. Zamfirescu-Pereira, {Bj{\"o}rn} Hartmann, Aditya~G.
-  Parameswaran, and Ian Arawjo.
-\newblock Who validates the validators? aligning {LLM}-assisted evaluation of
-  {LLM} outputs with human preferences.
-\newblock In {\em Proceedings of the 37th Annual ACM Symposium on User
-  Interface Software and Technology}, 2024.
+Shreya Shankar, J.D. Zamfirescu-Pereira, {Bj{\"o}rn} Hartmann, Aditya~G. Parameswaran, and Ian Arawjo.
+\newblock Who validates the validators? aligning {LLM}-assisted evaluation of {LLM} outputs with human preferences.
+\newblock In {\em Proceedings of the 37th Annual ACM Symposium on User Interface Software and Technology}, 2024.
 
 \bibitem{haris2024software}
 Syed~Muhammad Haris.
 \newblock Software engineering interview questions dataset.
-\newblock
-  \url{https://www.kaggle.com/datasets/syedmharis/software-engineering-interview-questions-dataset},
-  2024.
+\newblock \url{https://www.kaggle.com/datasets/syedmharis/software-engineering-interview-questions-dataset}, 2024.
 \newblock Kaggle.
 
 \end{thebibliography}

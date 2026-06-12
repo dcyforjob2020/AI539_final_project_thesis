@@ -1,13 +1,14 @@
 # Fdb version 4
-["bibtex main"] 1781234894.05864 "main.aux" "main.bbl" "main" 1781234894.85486 0
+["bibtex main"] 1781235001.60033 "main.aux" "main.bbl" "main" 1781235002.34733 0
   "./egbib.bib" 1781232069.61179 5129 deea67f108012eef1e469ed25e7f0590 ""
   "./ieee_fullname.bst" 1781168032.38659 19984 0ab9be46c11a73313512539790af4a41 ""
-  "main.aux" 1781234894.65187 4493 8d6e5010196e570e479b11c1133c2996 "pdflatex"
+  "main.aux" 1781235002.16428 4493 523462505f51e97128443094d4b7fe7b "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1781234894.13926 "main.tex" "main.pdf" "main" 1781234894.85497 0
+["pdflatex"] 1781235001.67528 "/Users/jackie/Desktop/osu/2026 spring/ST NLP WITH DEEP LEARNING AI_539/final project/ai539_final_report_latex_template/main.tex" "main.pdf" "main" 1781235002.34744 0
+  "/Users/jackie/Desktop/osu/2026 spring/ST NLP WITH DEEP LEARNING AI_539/final project/ai539_final_report_latex_template/main.tex" 1781235000.635 14743 b4de8dcb4ff44fda0a31c04896fd07ca ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/courier/pcrr7t.tfm" 1136768653 960 379cc0019370a9e0208a0a3f949f847a ""
@@ -138,11 +139,11 @@
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1770631664 3345730 ff29fc6e49ee08dd3bb808f549092fe5 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
   "cvpr.sty" 1673242922 22663 ae69ac60d981219f288927532f3b519c ""
-  "main.aux" 1781234894.65187 4493 8d6e5010196e570e479b11c1133c2996 "pdflatex"
-  "main.bbl" 1781234894.13717 1668 9ec29305af6954c5fe68c7832f2f7903 "bibtex main"
-  "main.brf" 1781234894.65256 314 a1340cf5705ab252459ca54d77f271b9 "pdflatex"
-  "main.out" 1781234894.65247 1565 bf07715e42dc0ab5c3c739c7ffdaa9e3 "pdflatex"
-  "main.tex" 1781234887.3538 15344 962b3cf051a6a69e5906820a8fa4e38f ""
+  "main.aux" 1781235002.16428 4493 523462505f51e97128443094d4b7fe7b "pdflatex"
+  "main.bbl" 1781235001.67313 1648 75927c3c6646ac352aed5a156facfe12 "bibtex main"
+  "main.brf" 1781235002.16484 314 a1340cf5705ab252459ca54d77f271b9 "pdflatex"
+  "main.out" 1781235002.16476 1565 bf07715e42dc0ab5c3c739c7ffdaa9e3 "pdflatex"
+  "main.tex" 1781235000.635 14743 b4de8dcb4ff44fda0a31c04896fd07ca ""
   "results_section.tex" 1781168032.39619 8568 42ff0032cd57f263b22311f3542f2072 ""
   (generated)
   "main.aux"
